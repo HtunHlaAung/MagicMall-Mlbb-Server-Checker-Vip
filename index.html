@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Magic Mall MLBB ID Checker Vip</title>
+  <style>
+    :root {
+      --bg-color: #f0f0f0;
+      --text-color: #000;
+      --container-bg: rgba(0, 0, 0, 0.05);
+      --button-bg: #0072ff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0f2027;
+      --text-color: #fff;
+      --container-bg: rgba(255, 255, 255, 0.05);
+      --button-bg: #00c6ff;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: var(--container-bg);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    input, button {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: var(--button-bg);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      filter: brightness(1.1);
+    }
+
+    #result {
+      margin-top: 20px;
+      white-space: pre-line;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 12px;
+      position: relative;
+    }
+
+    #loading {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #00c6ff;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .toggle-wrapper {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      border-radius: 30px;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "🌕";
+      height: 26px;
+      width: 26px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.4s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(30px);
+      content: "🌑";
+    }
+
+/* Copy button colors */
+.copy-btn {
+  background: #eee;
+  color: #000;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 13px;
+  transition: background 0.3s, color 0.3s;
+}
+
+[data-theme="dark"] .copy-btn {
+  background: #333;
+  color: #fff;
+}
+
+body[data-theme="light"] #historyList {
+  color: #444;
+}
+
+body[data-theme="dark"] #historyList {
+  color: #ccc;
+}
+  </style>
+</head>
+<body>
+  <div class="toggle-wrapper">
+    <label class="switch">
+      <input type="checkbox" id="modeToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="container">
+    <img src="logo.svg" alt="Logo"
+  style="width:70px; height:70px; border-radius:12px; background:white; padding:5px; margin-bottom:15px;"
+  oncontextmenu="return false;" 
+  onmousedown="return false;" 
+  ontouchstart="return false;" />
+    <h2 id="titleText">Magic Mall MLBB ID Checker Vip</h2>
+    <input type="text" id="idInput" placeholder="MLBB ID ထည့်ပါ။">
+    <input type="text" id="serverInput" placeholder="Server ID ထည့်ပါ။">
+    <button onclick="checkMLID()">စစ်ဆေးမည်။</button>
+
+    <div id="loading"><div class="spinner"></div></div>
+    <div id="result"></div>
+<div id="historyList" style="margin-top:20px; font-size:14px;"></div>
+    <button class="copy-button" onclick="copyResult()">📋 Copyကူးမည်</button>
+  </div>
+
+<script>
+  const toggle = document.getElementById("modeToggle");
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  });
+
+  function typeResult(text, element) {
+    element.textContent = "";
+    let i = 0;
+    function typeChar() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeChar, 20);
+      }
+    }
+    typeChar();
+  }
+
+  function copyResult() {
+    const text = document.getElementById("result").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      alert("📋 Copyကူးပြီးပါပြီ။");
+    });
+  }
+
+  function saveHistory(id, server) {
+    let history = JSON.parse(localStorage.getItem("mlbbHistory")) || [];
+    const entry = `${id} (${server})`;
+    if (!history.includes(entry)) {
+      history.unshift(entry);
+      if (history.length > 5) history.pop(); // Limit to 5
+      localStorage.setItem("mlbbHistory", JSON.stringify(history));
+    }
+    showHistory();
+  }
+
+  function showHistory() {
+    const history = JSON.parse(localStorage.getItem("mlbbHistory")) || [];
+    const container = document.getElementById("historyList");
+    container.innerHTML = "";
+    if (history.length > 0) {
+      container.innerHTML = "<h4>🔁 History</h4><ul style='text-align:left; padding-left:20px;'>";
+      history.forEach(h => {
+        container.innerHTML += `<li>${h}</li>`;
+      });
+      container.innerHTML += "</ul>";
+    }
+  }
+
+  async function checkMLID() {
+    const id = document.getElementById("idInput").value.trim();
+    const server = document.getElementById("serverInput").value.trim();
+    const result = document.getElementById("result");
+    const loading = document.getElementById("loading");
+
+    result.textContent = "";
+    if (!id || !server) {
+      result.textContent = "⚠️ ကျေးဇူးပြု၍ ID နှင့် Server ID နှစ်ခုလုံးထည့်ပါ။";
+      return;
+    }
+
+    loading.style.display = "block";
+
+    try {
+      const response = await fetch(`https://magicmall-mlbb-id-checker-vip.pages.dev/mobile-legends/${id}/${server}`);
+      const json = await response.json();
+      loading.style.display = "none";
+
+      if (json.error || !json.data) {
+        result.textContent = "❌ အကောင့်မတွေ့ပါ။";
+        return;
+      }
+
+      const data = json.data;
+      let message = "✔️ အကောင့်တွေ့ပါပြီ\n\n";
+      message += `✅ အမည်: ${data.username}\n`;
+      message += `🆔 ID: ${data.id}\n`;
+      message += `🖥 Server: ${data.server}\n`;
+      message += `🌏 ${formatCountryInfo(data.region)}`;
+
+      if (data.shop_events && data.shop_events.length > 0) {
+        message += `\n💎 Shop Events\n`;
+        data.shop_events.forEach(event => {
+          message += `\n${event.title}\n`;
+          event.goods.forEach(good => {
+            const status = good.game_can_buy ? "🟢 ရပါသေးတယ်" : "🔴 မရတော့ပါ";
+            message += `💎${good.title} - ${status}\n`;
+          });
+        });
+      }
+
+      typeResult(message, result);
+      saveHistory(id, server);
+    } catch (error) {
+      loading.style.display = "none";
+      result.textContent = "🚫 Server error. ပြန်စမ်းကြည့်ပါ။";
+    }
+  }
+
+  // Show history on load
+  window.addEventListener("DOMContentLoaded", showHistory);
+</script>
+    <!-- Your footer, popup etc. can remain unchanged below -->
+<footer style="margin-top:60px; padding:30px 20px; background:linear-gradient(135deg, #00c6ff, #0072ff); color:white; text-align:center; border-top-left-radius:20px; border-top-right-radius:20px; box-shadow:0 -8px 25px rgba(0,0,0,0.3); font-family:'Segoe UI', sans-serif; animation:glow 4s infinite alternate;">
+    <h3 style="margin-bottom:10px; font-size:22px; letter-spacing:0.5px;">📢 Connect With Us</h3>
+    <div style="margin-top:20px; display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
+      <a href="https://t.me/Magic_Mall_GameShop" target="_blank" title="Telegram Account" style="text-align:center; text-decoration:none;">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="Telegram" style="width:30px; height:30px; filter:invert(1);" />
+        <div style="font-size:14px; margin-top:5px;">Telegram Account</div>
+      </a>
+      <a href="https://t.me/Magic_Mall_Game_Shop" target="_blank" title="Telegram Channel">
+        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="Telegram Channel" style="width:30px; height:30px; filter:invert(1);" />
+      </a>
+      <a href="http://t.me/MagicMallGameShop_bot/MagicMallGameShop" target="_blank" title="Visit Website" style="text-align:center; text-decoration:none;">
+        <div style="width:30px; height:30px; background:white; color:#0072ff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; box-shadow:0 0 8px #fff; margin:0 auto;">M</div>
+        <div style="font-size:14px; margin-top:5px;">MagicMallGameShopBot</div>
+      </a>
+    </div>
+    <p style="font-size:13px; margin-top:25px; opacity:0.8;">© 2025 Magic Mall — All rights reserved</p>
+
+    <style>
+      @keyframes glow {
+        0% { box-shadow: 0 -8px 25px rgba(0,198,255,0.4); }
+        100% { box-shadow: 0 -12px 35px rgba(0,198,255,0.9); }
+      }
+    </style>
+  </footer>
+  <!-- 🔽 Add this just before </body> -->
+
+<!-- POPUP -->
+<div id="popupOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,20,30,0.85); align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#1e2a38; padding:30px 25px; border-radius:15px; text-align:center; color:#fff; max-width:350px; width:90%; position:relative; box-shadow:0 0 20px #00c6ff70; animation:popupZoom 0.5s ease;">
+    <span onclick="closePopup()" style="position:absolute; top:10px; right:15px; font-size:18px; color:#fff; cursor:pointer;">✖</span>
+<img src="logo.svg" alt="Logo"
+  style="width:70px; height:70px; border-radius:12px; background:white; padding:5px; margin-bottom:15px;"
+  oncontextmenu="return false;" 
+  onmousedown="return false;" 
+  ontouchstart="return false;" />
+    <h3>📢 Please Join Our Telegram Channel!</h3>
+    <p>Updateလေးတွေသိရအောင်အဆင်ပြေရင် Channelလေး joinခြင်းဖြင့်ကူညီနိုင်ပါတယ်ရှင့်။</p>
+    <a href="https://t.me/Magic_Mall_Game_Shop" target="_blank">
+      <button style="margin-top:15px; padding:12px 25px; background:linear-gradient(to right, #0072ff, #00c6ff); color:#fff; font-size:16px; font-weight:bold; border:none; border-radius:10px; cursor:pointer;">👉 Join Now</button>
+    </a>
+  </div>
+</div>
+
+<!-- POPUP ANIMATION STYLE -->
+<style>
+  @keyframes popupZoom {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+</style>
+
+<!-- POPUP SCRIPT -->
+<script>
+function showPopup() {
+  document.getElementById("popupOverlay").style.display = "flex";
+}
+
+function closePopup() {
+  document.getElementById("popupOverlay").style.display = "none";
+  // No storage, so popup will show every load
+}
+
+window.addEventListener("load", () => {
+  setTimeout(showPopup, 3000); // Always show after 3 seconds
+});
+</script>
+    <!-- ✅ Floating Draggable Telegram Button -->
+<div id="contactUsBtn" onclick="showContactPopup()" style="position:fixed; bottom:30px; right:30px; background:linear-gradient(to right, #0088cc, #00c6ff); padding:12px 16px; border-radius:50px; display:flex; align-items:center; gap:8px; color:#fff; font-weight:bold; font-size:14px; box-shadow:0 0 12px rgba(0,198,255,0.6); cursor:grab; z-index:10000; transition:top 0.15s ease, left 0.15s ease;">
+  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="Telegram" style="width:20px; height:20px; filter:invert(1);">
+  Help
+</div>
+
+<!-- ✅ Contact Popup -->
+<div id="contactPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); justify-content:center; align-items:center; z-index:9999;">
+  <div id="popupBox" style="background:#1e2a38; padding:25px; border-radius:15px; max-width:350px; width:90%; text-align:center; color:white; box-shadow:0 0 20px #00c6ff; position:relative;">
+    <img src="logo.svg" alt="Logo"
+  style="width:70px; height:70px; border-radius:12px; background:white; padding:5px; margin-bottom:15px;"
+  oncontextmenu="return false;" 
+  onmousedown="return false;" 
+  ontouchstart="return false;" />
+    <h3>📞 Contact Support</h3>
+    <p> Error တစ်ခုခုဖြစ်ခဲ့ပါကTelegram မှတဆင့်ဆက်သွယ်နိုင်ပါတယ်။</p>
+    <a href="https://t.me/Magic_Mall_GameShop" target="_blank" style="display:inline-block; margin-top:15px; background:linear-gradient(to right,#0072ff,#00c6ff); color:white; padding:10px 20px; border-radius:10px; text-decoration:none; font-weight:bold;">📨 Message Us</a>
+  </div>
+</div>
+
+<!-- ✅ Script for Drag, Open, Auto-Close -->
+<script>
+  const btn = document.getElementById("contactUsBtn");
+  const popup = document.getElementById("contactPopup");
+  const popupBox = document.getElementById("popupBox");
+
+  // ✅ Show Popup
+  function showContactPopup() {
+    popup.style.display = "flex";
+  }
+
+  // ✅ Close if clicked outside the box
+  popup.addEventListener("click", function (e) {
+    if (!popupBox.contains(e.target)) {
+      popup.style.display = "none";
+    }
+  });
+
+  // ✅ Drag Logic
+  let isDragging = false, offsetX = 0, offsetY = 0;
+
+  // Desktop drag
+  btn.addEventListener("mousedown", function (e) {
+    isDragging = true;
+    offsetX = e.clientX - btn.getBoundingClientRect().left;
+    offsetY = e.clientY - btn.getBoundingClientRect().top;
+    btn.style.cursor = "grabbing";
+  });
+
+  document.addEventListener("mousemove", function (e) {
+    if (isDragging) {
+      btn.style.left = e.clientX - offsetX + "px";
+      btn.style.top = e.clientY - offsetY + "px";
+      btn.style.right = "auto";
+      btn.style.bottom = "auto";
+    }
+  });
+
+  document.addEventListener("mouseup", function () {
+    isDragging = false;
+    btn.style.cursor = "grab";
+  });
+
+  // Mobile drag
+  btn.addEventListener("touchstart", function (e) {
+    isDragging = true;
+    const touch = e.touches[0];
+    offsetX = touch.clientX - btn.getBoundingClientRect().left;
+    offsetY = touch.clientY - btn.getBoundingClientRect().top;
+  });
+
+  document.addEventListener("touchmove", function (e) {
+    if (isDragging) {
+      const touch = e.touches[0];
+      btn.style.left = touch.clientX - offsetX + "px";
+      btn.style.top = touch.clientY - offsetY + "px";
+      btn.style.right = "auto";
+      btn.style.bottom = "auto";
+    }
+  });
+
+  document.addEventListener("touchend", function () {
+    isDragging = false;
+  });
+</script>
+<script>
+const countryMap = {
+  "AD":"Andorra","AE":"United Arab Emirates","AF":"Afghanistan","AG":"Antigua and Barbuda","AL":"Albania",
+  "AM":"Armenia","AO":"Angola","AQ":"Antarctica","AR":"Argentina","AS":"American Samoa","AT":"Austria",
+  "AU":"Australia","AW":"Aruba","AX":"Åland Islands","AZ":"Azerbaijan","BA":"Bosnia and Herzegovina",
+  "BB":"Barbados","BD":"Bangladesh","BE":"Belgium","BF":"Burkina Faso","BG":"Bulgaria","BH":"Bahrain",
+  "BI":"Burundi","BJ":"Benin","BL":"Saint Barthélemy","BM":"Bermuda","BN":"Brunei","BO":"Bolivia",
+  "BQ":"Dutch Caribbean","BR":"Brazil","BS":"Bahamas","BT":"The Kingdom of Bhutan","BV":"Bouvet Island",
+  "BW":"Botswana","BY":"Belarus","BZ":"Belize","CA":"Canada","CC":"Cocos (Keeling) Islands","CD":"Democratic Republic of the Congo",
+  "CF":"Central African Republic","CG":"Republic of the Congo","CH":"Switzerland","CI":"Côte d'Ivoire","CK":"Cook Islands",
+  "CL":"Chile","CM":"Cameroon","CN":"China","CO":"Colombia","CR":"Costa Rica","CU":"Cuba","CV":"Cape Verde",
+  "CW":"Curaçao","CX":"Christmas Island","CY":"Cyprus","CZ":"Czech Republic","DE":"Germany","DJ":"Djibouti",
+  "DK":"Denmark","DM":"Dominica","DO":"Dominican Republic","DZ":"Algeria","EC":"Ecuador","EE":"Estonia",
+  "EG":"Egypt","EH":"Western Sahara","ER":"Eritrea","ES":"Spain","ET":"Ethiopia","EZ":"Czech Republic",
+  "FI":"Finland","FJ":"Fiji","FK":"Falkland Islands (Malvinas)","FM":"Micronesia","FO":"Faroe Islands",
+  "FR":"France","GA":"Gabon","GB":"United Kingdom","GD":"Grenada","GE":"Georgia","GF":"French Guiana",
+  "GG":"Guernsey","GH":"Ghana","GI":"Gibraltar","GL":"Greenland","GM":"Gambia","GN":"Guinea","GP":"Guadeloupe",
+  "GQ":"Equatorial Guinea","GR":"Greece","GS":"South Georgia","GT":"Guatemala","GU":"Guam","GW":"Guinea-Bissau",
+  "GY":"Guyana","HK":"Hong Kong","HN":"Honduras","HR":"Croatia","HT":"Haiti","HU":"Hungary","ID":"Indonesia",
+  "IE":"Ireland","IL":"Israel","IM":"Isle of Man","IN":"India","IO":"British Indian Ocean Territory","IQ":"Iraq",
+  "IR":"Iran","IS":"Iceland","IT":"Italy","JE":"Jersey","JM":"Jamaica","JO":"Jordan","JP":"Japan","KE":"Kenya",
+  "KG":"Kyrgyzstan","KH":"Cambodia","KI":"Kiribati","KM":"Comoros","KN":"Saint Kitts and Nevis","KP":"North Korea",
+  "KR":"South Korea","KW":"Kuwait","KY":"Cayman Islands","KZ":"Kazakhstan","LA":"Laos","LB":"Lebanon",
+  "LC":"Saint Lucia","LI":"Liechtenstein","LK":"Sri Lanka","LR":"Liberia","LS":"Lesotho","LT":"Lithuania",
+  "LU":"Luxembourg","LV":"Latvia","LY":"Libya","MA":"Morocco","MC":"Monaco","MD":"Moldova","ME":"Montenegro",
+  "MF":"Mayotte","MG":"Madagascar","MH":"Marshall Islands","MK":"North Macedonia","ML":"Mali","MM":"Myanmar",
+  "MN":"Mongolia","MO":"Macao","MP":"Northern Mariana Islands","MQ":"Martinique","MR":"Mauritania","MS":"Montserrat",
+  "MT":"Malta","MU":"Mauritius","MV":"Maldives","MW":"Malawi","MX":"Mexico","MY":"Malaysia","MZ":"Mozambique",
+  "NA":"Namibia","NC":"New Caledonia","NE":"Niger","NF":"Norfolk Island","NG":"Nigeria","NI":"Nicaragua",
+  "NL":"Netherlands","NO":"Norway","NP":"Nepal","NR":"Nauru","NU":"Niue","NZ":"New Zealand","OM":"Oman",
+  "PA":"Panama","PE":"Peru","PF":"French Polynesia","PG":"Papua New Guinea","PH":"Philippines","PK":"Pakistan",
+  "PL":"Poland","PM":"Saint Pierre and Miquelon","PN":"Pitcairn Islands","PR":"Puerto Rico","PS":"Palestine",
+  "PT":"Portugal","PW":"Palau","PY":"Paraguay","QA":"Qatar","RE":"Réunion","RO":"Romania","RS":"Serbia",
+  "RU":"Russia","RW":"Rwanda","SA":"Saudi Arabia","SB":"Solomon Islands","SC":"Seychelles","SD":"Sudan",
+  "SE":"Sweden","SG":"Singapore","SH":"Saint Helena","SI":"Slovenia","SJ":"Svalbard","SK":"Slovakia",
+  "SL":"Sierra Leone","SM":"San Marino","SN":"Senegal","SO":"Somalia","SR":"Suriname","SS":"South Sudan",
+  "ST":"São Tomé and Príncipe","SV":"El Salvador","SX":"Sint Maarten","SY":"Syria","SZ":"Eswatini",
+  "TC":"Turks and Caicos Islands","TD":"Chad","TG":"Togo","TH":"Thailand","TJ":"Tajikistan","TK":"Tokelau",
+  "TL":"East Timor","TM":"Turkmenistan","TN":"Tunisia","TO":"Tonga","TR":"Turkey","TT":"Trinidad and Tobago",
+  "TV":"Tuvalu","TW":"Taiwan","TZ":"Tanzania","UA":"Ukraine","UG":"Uganda","UK":"United Kingdom",
+  "UM":"US Minor Outlying Islands","US":"United States","UY":"Uruguay","UZ":"Uzbekistan","VA":"Vatican",
+  "VC":"Saint Vincent","VE":"Venezuela","VG":"British Virgin Islands","VI":"U.S. Virgin Islands",
+  "VN":"Vietnam","VU":"Vanuatu","WF":"Wallis and Futuna","WS":"Samoa","XK":"Kosovo","YE":"Yemen",
+  "YT":"Mayotte","ZA":"South Africa","ZM":"Zambia","ZW":"Zimbabwe"
+};
+
+function formatCountryInfo(code) {
+  if (!code || code.length !== 2) return `နိုင်ငံ: ${code}`;
+  const name = countryMap[code.toUpperCase()] || code;
+  const flag = code.toUpperCase().replace(/./g, c =>
+    String.fromCodePoint(127397 + c.charCodeAt())
+  );
+  return `နိုင်ငံ: ${flag} ${name}`;
+}
+</script>
+</body>
+</html>
