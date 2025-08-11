@@ -131,6 +131,50 @@
     margin-top: 4px;
   }
 }
+/* Make the loader dots bigger and with smooth colors */
+#loading-spinner {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  background-color: #0072ff;  /* your brand blue */
+  border-radius: 50%;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* Make buttons-row full width */
+.buttons-row {
+  width: 100%;
+}
+
+/* Stretch check button to fill available space */
+.buttons-row button#checkBtn {
+  flex-grow: 1;
+}
+
+/* Center loader-row horizontally */
+.loader-row {
+  width: 100%;
+  justify-content: center;
+}
   </style>
 </head>
 <body>
@@ -157,10 +201,18 @@
         <input id="idInput" inputmode="numeric" placeholder="MLBB ID ထည့်ပါ (ဥပမာ 123456789)" autocomplete="off" />
         <input id="serverInput" inputmode="numeric" placeholder="Server ID ထည့်ပါ (ဥပမာ 0000)" autocomplete="off" />
 
-        <div class="row">
-          <button id="checkBtn" class="btn">စစ်ဆေးမည်</button>
-          <button id="copyBtn" class="secondary" style="min-width:120px">📋 Copy</button>
-        </div>
+       <div class="row buttons-row">
+  <button id="checkBtn" class="btn">စစ်ဆေးမည်</button>
+  <button id="copyBtn" class="secondary" style="min-width:120px">📋 Copy</button>
+</div>
+
+<div class="row loader-row" style="justify-content:center; margin-top:10px;">
+  <div id="loading-spinner" style="display:none;">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+</div>
 
         <div id="result" aria-atomic="true">Result ကိုဒီမှာပြသပေးမည်။</div>
       </div>
@@ -289,60 +341,114 @@
     }
 
     // country formatter (simple)
-    function formatCountry(code){
-      if(!code) return '';
-      try{
-        const flag = code.toUpperCase().replace(/./g,c => String.fromCodePoint(127397 + c.charCodeAt()));
-        return `နိုင်ငံ: ${flag} ${code}`;
-      }catch{ return `နိုင်ငံ: ${code}`; }
-    }
+   const countryMap = {
+  "AD":"Andorra","AE":"United Arab Emirates","AF":"Afghanistan","AG":"Antigua and Barbuda","AL":"Albania",
+  "AM":"Armenia","AO":"Angola","AQ":"Antarctica","AR":"Argentina","AS":"American Samoa","AT":"Austria",
+  "AU":"Australia","AW":"Aruba","AX":"Åland Islands","AZ":"Azerbaijan","BA":"Bosnia and Herzegovina",
+  "BB":"Barbados","BD":"Bangladesh","BE":"Belgium","BF":"Burkina Faso","BG":"Bulgaria","BH":"Bahrain",
+  "BI":"Burundi","BJ":"Benin","BL":"Saint Barthélemy","BM":"Bermuda","BN":"Brunei","BO":"Bolivia",
+  "BQ":"Dutch Caribbean","BR":"Brazil","BS":"Bahamas","BT":"The Kingdom of Bhutan","BV":"Bouvet Island",
+  "BW":"Botswana","BY":"Belarus","BZ":"Belize","CA":"Canada","CC":"Cocos (Keeling) Islands","CD":"Democratic Republic of the Congo",
+  "CF":"Central African Republic","CG":"Republic of the Congo","CH":"Switzerland","CI":"Côte d'Ivoire","CK":"Cook Islands",
+  "CL":"Chile","CM":"Cameroon","CN":"China","CO":"Colombia","CR":"Costa Rica","CU":"Cuba","CV":"Cape Verde",
+  "CW":"Curaçao","CX":"Christmas Island","CY":"Cyprus","CZ":"Czech Republic","DE":"Germany","DJ":"Djibouti",
+  "DK":"Denmark","DM":"Dominica","DO":"Dominican Republic","DZ":"Algeria","EC":"Ecuador","EE":"Estonia",
+  "EG":"Egypt","EH":"Western Sahara","ER":"Eritrea","ES":"Spain","ET":"Ethiopia","EZ":"Czech Republic",
+  "FI":"Finland","FJ":"Fiji","FK":"Falkland Islands (Malvinas)","FM":"Micronesia","FO":"Faroe Islands",
+  "FR":"France","GA":"Gabon","GB":"United Kingdom","GD":"Grenada","GE":"Georgia","GF":"French Guiana",
+  "GG":"Guernsey","GH":"Ghana","GI":"Gibraltar","GL":"Greenland","GM":"Gambia","GN":"Guinea","GP":"Guadeloupe",
+  "GQ":"Equatorial Guinea","GR":"Greece","GS":"South Georgia","GT":"Guatemala","GU":"Guam","GW":"Guinea-Bissau",
+  "GY":"Guyana","HK":"Hong Kong","HN":"Honduras","HR":"Croatia","HT":"Haiti","HU":"Hungary","ID":"Indonesia",
+  "IE":"Ireland","IL":"Israel","IM":"Isle of Man","IN":"India","IO":"British Indian Ocean Territory","IQ":"Iraq",
+  "IR":"Iran","IS":"Iceland","IT":"Italy","JE":"Jersey","JM":"Jamaica","JO":"Jordan","JP":"Japan","KE":"Kenya",
+  "KG":"Kyrgyzstan","KH":"Cambodia","KI":"Kiribati","KM":"Comoros","KN":"Saint Kitts and Nevis","KP":"North Korea",
+  "KR":"South Korea","KW":"Kuwait","KY":"Cayman Islands","KZ":"Kazakhstan","LA":"Laos","LB":"Lebanon",
+  "LC":"Saint Lucia","LI":"Liechtenstein","LK":"Sri Lanka","LR":"Liberia","LS":"Lesotho","LT":"Lithuania",
+  "LU":"Luxembourg","LV":"Latvia","LY":"Libya","MA":"Morocco","MC":"Monaco","MD":"Moldova","ME":"Montenegro",
+  "MF":"Mayotte","MG":"Madagascar","MH":"Marshall Islands","MK":"North Macedonia","ML":"Mali","MM":"Myanmar",
+  "MN":"Mongolia","MO":"Macao","MP":"Northern Mariana Islands","MQ":"Martinique","MR":"Mauritania","MS":"Montserrat",
+  "MT":"Malta","MU":"Mauritius","MV":"Maldives","MW":"Malawi","MX":"Mexico","MY":"Malaysia","MZ":"Mozambique",
+  "NA":"Namibia","NC":"New Caledonia","NE":"Niger","NF":"Norfolk Island","NG":"Nigeria","NI":"Nicaragua",
+  "NL":"Netherlands","NO":"Norway","NP":"Nepal","NR":"Nauru","NU":"Niue","NZ":"New Zealand","OM":"Oman",
+  "PA":"Panama","PE":"Peru","PF":"French Polynesia","PG":"Papua New Guinea","PH":"Philippines","PK":"Pakistan",
+  "PL":"Poland","PM":"Saint Pierre and Miquelon","PN":"Pitcairn Islands","PR":"Puerto Rico","PS":"Palestine",
+  "PT":"Portugal","PW":"Palau","PY":"Paraguay","QA":"Qatar","RE":"Réunion","RO":"Romania","RS":"Serbia",
+  "RU":"Russia","RW":"Rwanda","SA":"Saudi Arabia","SB":"Solomon Islands","SC":"Seychelles","SD":"Sudan",
+  "SE":"Sweden","SG":"Singapore","SH":"Saint Helena","SI":"Slovenia","SJ":"Svalbard","SK":"Slovakia",
+  "SL":"Sierra Leone","SM":"San Marino","SN":"Senegal","SO":"Somalia","SR":"Suriname","SS":"South Sudan",
+  "ST":"São Tomé and Príncipe","SV":"El Salvador","SX":"Sint Maarten","SY":"Syria","SZ":"Eswatini",
+  "TC":"Turks and Caicos Islands","TD":"Chad","TG":"Togo","TH":"Thailand","TJ":"Tajikistan","TK":"Tokelau",
+  "TL":"East Timor","TM":"Turkmenistan","TN":"Tunisia","TO":"Tonga","TR":"Turkey","TT":"Trinidad and Tobago",
+  "TV":"Tuvalu","TW":"Taiwan","TZ":"Tanzania","UA":"Ukraine","UG":"Uganda","UK":"United Kingdom",
+  "UM":"US Minor Outlying Islands","US":"United States","UY":"Uruguay","UZ":"Uzbekistan","VA":"Vatican",
+  "VC":"Saint Vincent","VE":"Venezuela","VG":"British Virgin Islands","VI":"U.S. Virgin Islands",
+  "VN":"Vietnam","VU":"Vanuatu","WF":"Wallis and Futuna","WS":"Samoa","XK":"Kosovo","YE":"Yemen",
+  "YT":"Mayotte","ZA":"South Africa","ZM":"Zambia","ZW":"Zimbabwe"
+};
+
+function formatCountryInfo(code) {
+  if (!code || code.length !== 2) return `နိုင်ငံ: ${code}`;
+  const name = countryMap[code.toUpperCase()] || code;
+  const flag = code.toUpperCase().replace(/./g, c =>
+    String.fromCodePoint(127397 + c.charCodeAt())
+  );
+  return `နိုင်ငံ: ${flag} ${name}`;
+}
 
     // ---------- Main action ----------
-    async function checkML(){
-      const id = idInput.value.trim();
-      const server = serverInput.value.trim();
-      if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
+ async function checkML(){
+  const id = idInput.value.trim();
+  const server = serverInput.value.trim();
+  if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
 
-      checkBtn.disabled = true; checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
+  checkBtn.disabled = true; 
+  checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
 
-      try{
-        const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+  // SHOW loader here
+  document.getElementById('loading-spinner').style.display = 'flex';
 
-        if(json.error || !json.data){
-          typeResult('❌ အကောင့်မတွေ့ပါ။');
-          showToast('Account not found');
-        } else {
-          const d = json.data;
-          let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
-          msg += `✅ အမည်: ${d.username || '—'}\n`;
-          msg += `🆔 ID: ${d.id || id}\n`;
-          msg += `🖥 Server: ${d.server || server}\n`;
-          msg += formatCountry(d.region) + '\n';
+  try{
+    const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
 
-          if(d.shop_events && d.shop_events.length){
-            msg += '\n💎 Shop Events:\n';
-            d.shop_events.forEach(ev =>{
-              msg += `\n— ${ev.title}\n`;
-              ev.goods.forEach(g =>{
-                const status = g.game_can_buy ? '🟢 ရပါသေးတယ်' : '🔴 မရတော့ပါ';
-                msg += `${g.title} — ${status}\n`;
-              });
-            });
-          }
+    if(json.error || !json.data){
+      typeResult('❌ အကောင့်မတွေ့ပါ။');
+      showToast('Account not found');
+    } else {
+      const d = json.data;
+      let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
+      msg += `✅ အမည်: ${d.username || '—'}\n`;
+      msg += `🆔 ID: ${d.id || id}\n`;
+      msg += `🖥 Server: ${d.server || server}\n`;
+      msg += formatCountry(d.region) + '\n';
 
-          typeResult(msg);
-          saveHistory(id, server);
-        }
-      }catch(err){
-        console.error(err);
-        typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
-        showToast('Server error');
-      } finally{
-        checkBtn.disabled = false; checkBtn.textContent = 'စစ်ဆေးမည်';
+      if(d.shop_events && d.shop_events.length){
+        msg += '\n💎 Shop Events:\n';
+        d.shop_events.forEach(ev =>{
+          msg += `\n— ${ev.title}\n`;
+          ev.goods.forEach(g =>{
+            const status = g.game_can_buy ? '🟢 ရပါသေးတယ်' : '🔴 မရတော့ပါ';
+            msg += `${g.title} — ${status}\n`;
+          });
+        });
       }
+
+      typeResult(msg);
+      saveHistory(id, server);
     }
+  }catch(err){
+    console.error(err);
+    typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
+    showToast('Server error');
+  } finally{
+    checkBtn.disabled = false; 
+    checkBtn.textContent = 'စစ်ဆေးမည်';
+
+    // HIDE loader here
+    document.getElementById('loading-spinner').style.display = 'none';
+  }
+}
 
     // ---------- Copy result ----------
     copyBtn.addEventListener('click', ()=>{
