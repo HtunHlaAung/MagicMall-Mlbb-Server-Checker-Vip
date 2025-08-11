@@ -124,11 +124,37 @@
     flex: 1 1 100%;
     margin: 0;
   }
-
   p.lead {
     font-size: 12px;
     flex: 1 1 100%;
     margin-top: 4px;
+  }
+}
+#loading-spinner {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  background-color: #0072ff;  /* your brand blue */
+  border-radius: 50%;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.5);
   }
 }
   </style>
@@ -157,11 +183,20 @@
         <input id="idInput" inputmode="numeric" placeholder="MLBB ID ထည့်ပါ (ဥပမာ 123456789)" autocomplete="off" />
         <input id="serverInput" inputmode="numeric" placeholder="Server ID ထည့်ပါ (ဥပမာ 0000)" autocomplete="off" />
 
-        <div class="row">
-          <button id="checkBtn" class="btn">စစ်ဆေးမည်</button>
-          <button id="copyBtn" class="secondary" style="min-width:120px">📋 Copy</button>
-        </div>
+      <!-- Buttons container -->
+<div class="row buttons-row" style="gap:12px;">
+  <button id="checkBtn" class="btn" style="flex:1;">စစ်ဆေးမည်</button>
+  <button id="copyBtn" class="secondary" style="min-width:120px;">📋 Copy</button>
+</div>
 
+<!-- Loader container below buttons -->
+<div class="row loader-row" style="justify-content:center; margin-top:16px; width:100%;">
+  <div id="loading-spinner" style="display:none;">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+</div>
         <div id="result" aria-atomic="true">Result ကိုဒီမှာပြသပေးမည်။</div>
       </div>
 
@@ -345,50 +380,57 @@ function formatCountryInfo(code) {
 
     // ---------- Main action ----------
     async function checkML(){
-      const id = idInput.value.trim();
-      const server = serverInput.value.trim();
-      if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
+  const id = idInput.value.trim();
+  const server = serverInput.value.trim();
+  if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
 
-      checkBtn.disabled = true; checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
+  checkBtn.disabled = true;
+  checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
 
-      try{
-        const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+  // Show loading spinner
+  document.getElementById('loading-spinner').style.display = 'flex';
 
-        if(json.error || !json.data){
-          typeResult('❌ အကောင့်မတွေ့ပါ။');
-          showToast('Account not found');
-        } else {
-          const d = json.data;
-          let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
-          msg += `✅ အမည်: ${d.username || '—'}\n`;
-          msg += `🆔 ID: ${d.id || id}\n`;
-          msg += `🖥 Server: ${d.server || server}\n`;
-          msg += formatCountryInfo(d.region) + '\n';
+  try {
+    const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
 
-          if(d.shop_events && d.shop_events.length){
-            msg += '\n💎 Shop Events:\n';
-            d.shop_events.forEach(ev =>{
-              msg += `\n— ${ev.title}\n`;
-              ev.goods.forEach(g =>{
-                const status = g.game_can_buy ? '🟢 ရပါသေးတယ်' : '🔴 မရတော့ပါ';
-                msg += `${g.title} — ${status}\n`;
-              });
-            });
-          }
-
-          typeResult(msg);
-          saveHistory(id, server);
-        }
-      }catch(err){
-        console.error(err);
-        typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
-        showToast('Server error');
-      } finally{
-        checkBtn.disabled = false; checkBtn.textContent = 'စစ်ဆေးမည်';
+    if(json.error || !json.data){
+      typeResult('❌ အကောင့်မတွေ့ပါ။');
+      showToast('Account not found');
+    } else {
+      const d = json.data;
+      let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
+      msg += `✅ အမည်: ${d.username || '—'}\n`;
+      msg += `🆔 ID: ${d.id || id}\n`;
+      msg += `🖥 Server: ${d.server || server}\n`;
+      msg += formatCountryInfo(d.region) + '\n';
+      if(d.shop_events && d.shop_events.length){
+        msg += '\n💎 Shop Events:\n';
+        d.shop_events.forEach(ev =>{
+          msg += `\n— ${ev.title}\n`;
+          ev.goods.forEach(g =>{
+            const status = g.game_can_buy ? '🟢 ရပါသေးတယ်' : '🔴 မရတော့ပါ';
+            msg += `${g.title} — ${status}\n`;
+          });
+        });
       }
+
+      typeResult(msg);
+      saveHistory(id, server);
     }
+  } catch(err){
+    console.error(err);
+    typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
+    showToast('Server error');
+  } finally {
+    // Hide loading spinner
+    document.getElementById('loading-spinner').style.display = 'none';
+
+    checkBtn.disabled = false;
+    checkBtn.textContent = 'စစ်ဆေးမည်';
+  }
+}
 
     // ---------- Copy result ----------
     copyBtn.addEventListener('click', ()=>{
