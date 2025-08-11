@@ -365,7 +365,7 @@ function formatCountryInfo(code) {
           msg += `✅ အမည်: ${d.username || '—'}\n`;
           msg += `🆔 ID: ${d.id || id}\n`;
           msg += `🖥 Server: ${d.server || server}\n`;
-          msg += formatCountry(d.region) + '\n';
+          msg += formatCountryInfo(d.region) + '\n';
 
           if(d.shop_events && d.shop_events.length){
             msg += '\n💎 Shop Events:\n';
