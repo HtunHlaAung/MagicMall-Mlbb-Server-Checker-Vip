@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="my">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Magic Mall — MLBB ID Checker (VIP)</title>
@@ -191,11 +192,7 @@
 
 <!-- Loader container below buttons -->
 <div class="row loader-row" style="justify-content:center; margin-top:16px; width:100%;">
-  <div id="loading-spinner" style="display:none;">
-    <span class="dot"></span>
-    <span class="dot"></span>
-    <span class="dot"></span>
-  </div>
+ <div id="loading-spinner" style="width: 100px; height: 100px; margin: auto; display:none;"></div>
 </div>
         <div id="result" aria-atomic="true">Result ကိုဒီမှာပြသပေးမည်။</div>
       </div>
@@ -387,9 +384,8 @@ function formatCountryInfo(code) {
   checkBtn.disabled = true;
   checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
 
-  // Show loading spinner
-  document.getElementById('loading-spinner').style.display = 'flex';
-
+  showSpinner();
+  
   try {
     const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -424,9 +420,8 @@ function formatCountryInfo(code) {
     typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
     showToast('Server error');
   } finally {
-    // Hide loading spinner
-    document.getElementById('loading-spinner').style.display = 'none';
-
+   hideSpinner();
+   
     checkBtn.disabled = false;
     checkBtn.textContent = 'စစ်ဆေးမည်';
   }
@@ -484,6 +479,31 @@ function formatCountryInfo(code) {
     // small accessibility: allow keyboard toggle
     themeSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); themeSwitch.click(); } });
 
-  </script>
+  // ... your existing JS code ...
+
+  // Initialize Lottie animation for loading spinner
+  const loadingSpinner = document.getElementById('loading-spinner');
+
+  const lottieAnim = lottie.loadAnimation({
+  container: loadingSpinner, // the dom element
+  renderer: 'svg',
+  loop: true,
+  autoplay: false,
+  path: 'https://raw.githubusercontent.com/HtunHlaAung/MagicMall-Mlbb-Server-Checker-Vip/456680c42c643d39c834e580c328ebb8a1211474/MWhite.json'
+});
+  // Show spinner function
+  function showSpinner() {
+    loadingSpinner.style.display = 'block';
+    lottieAnim.play();
+  }
+
+  // Hide spinner function
+  function hideSpinner() {
+    lottieAnim.stop();
+    loadingSpinner.style.display = 'none';
+  }
+
+  // ... rest of your code ...
+</script>
 </body>
 </html>
