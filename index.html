@@ -401,16 +401,19 @@ function formatCountryInfo(code) {
       msg += `🆔 ID: ${d.id || id}\n`;
       msg += `🖥 Server: ${d.server || server}\n`;
       msg += formatCountryInfo(d.region) + '\n';
-      if(d.shop_events && d.shop_events.length){
-        msg += '\n💎 Shop Events:\n';
-        d.shop_events.forEach(ev =>{
-          msg += `\n— ${ev.title}\n`;
-          ev.goods.forEach(g =>{
-            const status = g.game_can_buy ? '🟢 ရပါသေးတယ်' : '🔴 မရတော့ပါ';
-            msg += `${g.title} — ${status}\n`;
-          });
-        });
-      }
+     if(d.shop_events && d.shop_events.length){
+  msg += '\n💎 Shop Events:\n';
+  d.shop_events.forEach(ev => {
+    if(ev.title) msg += `\n— ${ev.title}\n`;
+    if(ev.goods && ev.goods.length){
+      ev.goods.forEach(g => {
+        let status = '🟢 ရပါသေးတယ်';
+        if(g.reached_limit === true) status = '🔴 မရတော့ပါ';
+        msg += `${g.title || '—'} — ${status}\n`;
+      });
+    }
+  });
+}
 
       typeResult(msg);
       saveHistory(id, server);
