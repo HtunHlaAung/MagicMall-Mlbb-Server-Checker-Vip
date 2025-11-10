@@ -260,7 +260,8 @@
 
   <script>
     // ---------- Config ----------
-    const WORKER_BASE = 'https://magic-mall-mlbb-id-checker-vip.hlaaunghtun68.workers.dev/mobile-legends';
+    const API_HOST = 'id-game-checker.p.rapidapi.com';
+const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
     const MAX_HISTORY = 6;
 
     // Elements
@@ -385,9 +386,22 @@ function formatCountryInfo(code) {
   checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
 
   showSpinner();
-  
+
+  // RapidAPI setup
+  const API_HOST = 'id-game-checker.p.rapidapi.com';
+  const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
+
   try {
-    const res = await fetch(`${WORKER_BASE}/${encodeURIComponent(id)}/${encodeURIComponent(server)}`, {cache: 'no-store'});
+    const url = `https://${API_HOST}/mobile-legends/${encodeURIComponent(id)}/${encodeURIComponent(server)}`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': API_HOST,
+        'x-rapidapi-key': API_KEY
+      },
+      cache: 'no-store'
+    });
+
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
 
@@ -401,19 +415,19 @@ function formatCountryInfo(code) {
       msg += `🆔 ID: ${d.id || id}\n`;
       msg += `🖥 Server: ${d.server || server}\n`;
       msg += formatCountryInfo(d.region) + '\n';
-     if(d.shop_events && d.shop_events.length){
-  msg += '\n💎 Shop Events:\n';
-  d.shop_events.forEach(ev => {
-    if(ev.title) msg += `\n— ${ev.title}\n`;
-    if(ev.goods && ev.goods.length){
-      ev.goods.forEach(g => {
-        let status = '🟢 ရပါသေးတယ်';
-        if(g.reached_limit === true) status = '🔴 မရတော့ပါ';
-        msg += `${g.title || '—'} — ${status}\n`;
-      });
-    }
-  });
-}
+
+      if(d.shop_events && d.shop_events.length){
+        msg += '\n💎 Shop Events:\n';
+        d.shop_events.forEach(ev => {
+          if(ev.title) msg += `\n— ${ev.title}\n`;
+          if(ev.goods && ev.goods.length){
+            ev.goods.forEach(g => {
+              let status = g.reached_limit === true ? '🔴 မရတော့ပါ' : '🟢 ရပါသေးတယ်';
+              msg += `${g.title || '—'} — ${status}\n`;
+            });
+          }
+        });
+      }
 
       typeResult(msg);
       saveHistory(id, server);
@@ -423,8 +437,7 @@ function formatCountryInfo(code) {
     typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
     showToast('Server error');
   } finally {
-   hideSpinner();
-   
+    hideSpinner();
     checkBtn.disabled = false;
     checkBtn.textContent = 'စစ်ဆေးမည်';
   }
