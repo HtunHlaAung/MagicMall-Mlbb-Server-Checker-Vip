@@ -5,211 +5,270 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Magic Mall — MLBB ID Checker (VIP)</title>
-  <meta name="description" content="" />
+  <meta name="description" content="MLBB ID and Server Checker" />
 
   <style>
     :root{
-      --bg: #f5f7fb;
-      --card: rgba(0,0,0,0.04);
+      /* Base Colors */
       --text: #0b1220;
-      --accent: linear-gradient(90deg,#0072ff,#00c6ff);
+      --accent: linear-gradient(135deg, #0072ff, #00c6ff);
+      --accent-color: #0072ff;
       --muted: #6b7280;
-      --success: #16a34a;
       --danger: #ef4444;
-      --radius: 14px;
-      --glass: rgba(255,255,255,0.6);
+      --radius: 18px; /* Slightly larger radius */
+      
+      /* Glass variables (Light Mode) */
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --shadow: 0 10px 40px rgba(2,6,23,0.1);
+      --input-border: rgba(0,0,0,0.1);
+      --input-focus-ring: rgba(0, 114, 255, 0.4);
+
+      /* Dynamic Background Colors (Light) */
+      --bg-base: #f3f4f6; /* Lighter base background */
+      --gradient-light-1: #e0f2fe; /* Light sky blue */
+      --gradient-light-2: #f0f9ff; /* Very light blue */
     }
 
     [data-theme="dark"]{
-      --bg: #071021;
-      --card: rgba(255,255,255,0.04);
+      /* Base Colors */
       --text: #e6f0ff;
       --muted: #9aa6b2;
-      --glass: rgba(255,255,255,0.03);
+      
+      /* Glass variables (Dark Mode) */
+      --glass-bg: rgba(255, 255, 255, 0.08); /* Less opaque in dark mode */
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --shadow: 0 10px 40px rgba(0,0,0,0.5);
+      --input-border: rgba(255,255,255,0.06);
+      --input-focus-ring: rgba(0, 114, 255, 0.6);
+
+      /* Dynamic Background Colors (Dark) */
+      --bg-base: #071021;
+      --gradient-dark-1: #1e3a8a; /* Deep sapphire */
+      --gradient-dark-2: #071021; /* Near black */
     }
 
+    /* --- Dynamic Background --- */
+    .gradient-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-color: var(--bg-base); 
+        transition: background-color 0.5s ease;
+        
+        /* Light Mode Gradient */
+        background-image: radial-gradient(circle at 10% 10%, var(--gradient-light-1) 0%, transparent 50%),
+                          radial-gradient(circle at 80% 90%, var(--gradient-light-2) 0%, transparent 50%);
+        background-size: 150% 150%, 150% 150%;
+        background-position: 0% 0%, 100% 100%;
+        animation: moveGradient 30s infinite alternate linear;
+    }
+
+    [data-theme="dark"] .gradient-bg {
+        /* Dark Mode Gradient */
+        background-image: radial-gradient(circle at 10% 10%, var(--gradient-dark-1) 0%, transparent 40%),
+                          radial-gradient(circle at 90% 80%, var(--gradient-dark-2) 0%, transparent 40%);
+        background-size: 150% 150%, 150% 150%;
+        background-position: 0% 0%, 100% 100%;
+    }
+
+    @keyframes moveGradient {
+        0% { background-position: 0% 0%, 100% 100%; }
+        50% { background-position: 50% 50%, 0% 0%; }
+        100% { background-position: 100% 100%, 0% 100%; }
+    }
+    /* --- End Dynamic Background --- */
+
+
+    /* Base Styling */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font-family:Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial;
-      background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
-      display:flex; align-items:center; justify-content:center; padding:20px; gap:20px;
+      color:var(--text); -webkit-font-smoothing:antialiased;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      min-height:100vh; 
+      position:relative; 
+      transition: color 0.3s ease;
     }
 
-    .wrap{width:100%; max-width:760px; display:grid; grid-template-columns:1fr 340px; gap:18px; align-items:start}
+    .wrap{width:100%; max-width:800px; display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start}
 
-    /* Left: main card */
+    /* --- Glass Card Style (Upgraded) --- */
     .card{
-      background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:0 8px 30px rgba(2,6,23,0.06);
-      backdrop-filter: blur(6px);
+      background:var(--glass-bg); 
+      border-radius:var(--radius); 
+      padding:24px; 
+      backdrop-filter: blur(20px) saturate(180%); /* Richer blur to show dynamic background */
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow), inset 0 0 0 1px var(--glass-border); 
+      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+    }
+    
+    .card:hover {
+      transform: perspective(1000px) rotateX(1deg) rotateY(1deg) scale(1.01); 
+      box-shadow: var(--shadow), inset 0 0 0 1px var(--glass-border); 
     }
 
-    .brand{display:flex; gap:12px; align-items:center}
-    .logo{width:64px; height:64px; border-radius:12px; background:#fff; display:inline-grid; place-items:center; font-weight:700; color:#0072ff}
-    h1{font-size:18px; margin:0}
-    p.lead{margin:6px 0 14px; color:var(--muted); font-size:13px}
+    .brand{display:flex; gap:16px; align-items:center}
+    .logo{width:56px; height:56px; border-radius:14px; background:#fff; display:inline-grid; place-items:center; font-weight:700; color:var(--accent-color); flex-shrink: 0}
+    h1{font-size:20px; margin:0}
+    p.lead{margin:6px 0 18px; color:var(--muted); font-size:14px}
 
-    .form{display:flex; gap:8px; flex-direction:column}
-    .form input{padding:12px 14px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); font-size:15px; background:transparent; color:var(--text)}
-    [data-theme="dark"] .form input{border-color: rgba(255,255,255,0.04)}
+    .form{display:flex; gap:12px; flex-direction:column}
+    .form input{
+      padding:14px 16px; 
+      border-radius:12px; 
+      border:1px solid var(--input-border); 
+      font-size:16px; 
+      background:var(--glass-border); 
+      color:var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px var(--input-focus-ring);
+    }
 
-    .row{display:flex; gap:8px}
+    .row{display:flex; gap:12px}
     .btn{
-      padding:12px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600; font-size:15px; background:var(--accent); color:#fff; box-shadow:0 6px 18px rgba(3,10,35,0.12);
+      padding:14px 16px; 
+      border-radius:12px; 
+      border:none; 
+      cursor:pointer; 
+      font-weight:600; 
+      font-size:16px; 
+      background:var(--accent); 
+      color:#fff; 
+      box-shadow:0 6px 18px rgba(3,10,35,0.2);
+      transition: transform .1s, opacity .2s;
     }
-    .btn:active{transform:translateY(1px)}
+    .btn:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(3,10,35,0.2);}
+    .btn:disabled{opacity:0.6; cursor:not-allowed; transform:none}
 
-    .secondary{background:transparent; border:1px solid rgba(0,0,0,0.06); color:var(--text)}
+    .secondary{
+      background:transparent; 
+      border:1px solid var(--input-border); 
+      color:var(--text);
+      box-shadow:none;
+    }
+    .secondary:hover {
+        background: var(--glass-border);
+    }
+    .secondary:active{transform:translateY(1px); box-shadow:none;}
 
-    #result{margin-top:14px; padding:14px; border-radius:10px; background:var(--glass); white-space:pre-line; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace}
 
-    .meta{display:flex; justify-content:space-between; align-items:center; gap:8px}
-    .history{background:transparent; padding:10px; border-radius:10px}
-    .history ul{padding-left:18px; margin:8px 0 0; color:var(--muted)}
-    .history li{cursor:pointer; padding:6px 8px; border-radius:8px}
-    .history li:hover{background:rgba(0,0,0,0.03)}
+    #result{
+      margin-top:16px; 
+      padding:16px; 
+      border-radius:12px; 
+      background:var(--glass-border); 
+      white-space:pre-line; 
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .meta{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:20px;}
+    .history{background:transparent; padding:0; border-radius:var(--radius); flex-grow: 1;}
+    .history ul{padding-left:0; margin:8px 0 0; color:var(--muted); list-style:none}
+    .history li{cursor:pointer; padding:8px 10px; border-radius:10px; transition: background 0.2s;}
+    .history li:hover{background:var(--glass-border); color:var(--text)}
+    .history strong {font-size:15px}
+
 
     /* Right column */
-    .side{display:flex; flex-direction:column; gap:12px}
-    .card.small{padding:14px}
+    .side{display:flex; flex-direction:column; gap:16px}
+    .card.small{padding:18px}
 
     /* Toggle */
     .toggle{display:flex; justify-content:flex-end}
-    .switch{width:54px; height:30px; background:rgba(0,0,0,0.06); border-radius:30px; position:relative}
-    .knob{position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:transform .25s}
-    [data-theme="dark"] .switch{background:rgba(255,255,255,0.06)}
-    [data-theme="dark"] .knob{transform:translateX(24px)}
+    .switch{width:56px; height:32px; background:var(--input-border); border-radius:32px; position:relative; cursor:pointer; transition:background 0.3s}
+    .knob{position:absolute; top:4px; left:4px; width:24px; height:24px; border-radius:50%; background:#fff; transition:transform .3s, background 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2)}
+    [data-theme="dark"] .switch{background:rgba(255,255,255,0.2)}
+    [data-theme="dark"] .knob{transform:translateX(24px); background:var(--accent-color)}
+
 
     /* popup */
-    .overlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:60}
+    .overlay{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:60; background:rgba(0,0,0,0.4); backdrop-filter: blur(4px)}
     .overlay.show{display:flex}
-    .popup{width:92%; max-width:380px; background:#071422; color:#fff; padding:20px; border-radius:12px; text-align:center}
-
+    .popup{width:92%; max-width:400px; background:var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter: blur(10px); color:var(--text); padding:28px; border-radius:16px; text-align:center; box-shadow:var(--shadow)}
+    .popup .btn {margin-top:0}
+    
     /* toast */
-    .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:rgba(0,0,0,0.75); color:#fff; padding:10px 14px; border-radius:10px; display:none; z-index:80}
+    .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:30px; background:rgba(0,0,0,0.8); color:#fff; padding:12px 18px; border-radius:12px; display:none; z-index:80; font-size:14px; box-shadow:0 4px 12px rgba(0,0,0,0.2)}
     .toast.show{display:block}
 
     /* draggable contact */
-    #contactBtn{position:fixed; right:18px; bottom:18px; z-index:70; padding:10px 12px; border-radius:999px; display:flex; gap:8px; align-items:center; cursor:grab}
+    #contactBtn{
+      position:fixed; right:24px; bottom:24px; z-index:70; 
+      padding:12px 16px; 
+      border-radius:999px; 
+      display:flex; gap:8px; align-items:center; cursor:grab;
+      background:var(--accent); color:#fff; border:none;
+      box-shadow:0 4px 15px rgba(0, 114, 255, 0.4);
+      font-weight:600;
+    }
 
-    footer{grid-column:1 / -1; text-align:center; margin-top:8px; font-size:13px; color:var(--muted)}
+    footer{grid-column:1 / -1; text-align:center; margin-top:12px; font-size:12px; color:var(--muted)}
 
     /* responsive */
     @media (max-width:880px){
-      .wrap{grid-template-columns:1fr;}
-      #contactBtn{right:12px; bottom:12px}
+      .wrap{grid-template-columns:1fr; gap:16px}
+      .card{padding:20px}
+      .side{flex-direction:row; order: -1;} 
+      .side > .card {flex: 1 1 50%;}
+      #contactBtn{right:16px; bottom:16px}
+      .meta {flex-direction: column; align-items: flex-start;}
+      .history {width: 100%;}
     }
-@media (max-width: 768px) {
-  body {
-    align-items: flex-start; /* move content to top */
-    justify-content: flex-start;
-    padding-top: 20px;
-    height: auto; /* allow natural height */
-  }
-}
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start; 
+        padding-top: 20px;
+        height: auto;
+      }
+      .side {flex-direction: column;}
+    }
 
-  .logo {
-  display: inline-grid !important;
-  width: 48px !important;
-  height: 48px !important;
-  flex-shrink: 0 !important;
-  background-color: #fff !important;
-  color: #0072ff !important;
-  place-items: center !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-}
-
-  h1 {
-    font-size: 16px;
-    flex: 1 1 100%;
-    margin: 0;
-  }
-  p.lead {
-    font-size: 12px;
-    flex: 1 1 100%;
-    margin-top: 4px;
-  }
-}
-#loading-spinner {
-  display: flex;
-  gap: 12px;
-}
-
-.dot {
-  width: 16px;
-  height: 16px;
-  background-color: #0072ff;  /* your brand blue */
-  border-radius: 50%;
-  animation: pulse 1.2s infinite ease-in-out;
-}
-
-.dot:nth-child(1) { animation-delay: 0s; }
-.dot:nth-child(2) { animation-delay: 0.2s; }
-.dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes pulse {
-  0%, 80%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
-}
+    /* New loading spinner style */
+    #loading-spinner-container {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      height: 60px; 
+      margin-top: 10px;
+    }
+    #loading-spinner {
+      width: 50px; 
+      height: 50px;
+      margin: auto;
+    }
+    
+    /* Fallback image/svg/gif for Lottie */
+    .lottie-fallback {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--accent-color);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
+  
+  <div class="gradient-bg"></div>
 
   <div class="wrap">
-    <main class="card" aria-live="polite">
-      <div class="brand">
-        <img 
-  src="logo.svg" 
-  alt="Logo" 
-  class="logo" 
-  draggable="false"
-  oncontextmenu="return false"
-  onmousedown="return false"
-  ontouchstart="return false"
-/>
-        <div>
-          <h1>Magic Mall — MLBB ID Checker (VIP)</h1>
-          <p class="lead"></p>
-        </div>
-      </div>
-
-      <div class="form" style="margin-top:12px">
-        <input id="idInput" inputmode="numeric" placeholder="MLBB ID ထည့်ပါ (ဥပမာ 123456789)" autocomplete="off" />
-        <input id="serverInput" inputmode="numeric" placeholder="Server ID ထည့်ပါ (ဥပမာ 0000)" autocomplete="off" />
-
-      <!-- Buttons container -->
-<div class="row buttons-row" style="gap:12px;">
-  <button id="checkBtn" class="btn" style="flex:1;">စစ်ဆေးမည်</button>
-  <button id="copyBtn" class="secondary" style="min-width:120px;">📋 Copy</button>
-</div>
-
-<!-- Loader container below buttons -->
-<div class="row loader-row" style="justify-content:center; margin-top:16px; width:100%;">
- <div id="loading-spinner" style="width: 100px; height: 100px; margin: auto; display:none;"></div>
-</div>
-        <div id="result" aria-atomic="true">Result ကိုဒီမှာပြသပေးမည်။</div>
-      </div>
-
-      <div class="meta" style="margin-top:12px">
-        <div class="history card small">
-          <strong>🔁 History</strong>
-          <div id="historyContainer"></div>
-        </div>
-
-        <div style="text-align:right">
-          <small style="color:var(--muted)"></small>
-        </div>
-      </div>
-
-    </main>
-
+    
     <aside class="side">
       <div class="card small">
         <div style="display:flex;justify-content:space-between;align-items:center">
@@ -224,10 +283,10 @@
             </div>
           </div>
         </div>
+        
+        <hr style="margin:16px 0;border:none;border-top:1px solid var(--input-border)" />
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.04)" />
-
-        <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:10px">
           <button id="openChannel" class="btn" style="background:linear-gradient(90deg,#0088cc,#00c6ff)">👉 Join Telegram Channel</button>
           <button id="openBot" class="secondary">Open Bot</button>
         </div>
@@ -239,16 +298,50 @@
       </div>
     </aside>
 
+    <main class="card" aria-live="polite">
+      <div class="brand">
+        <div class="logo">MM</div>
+        <div>
+          <h1>Magic Mall — MLBB ID Checker (VIP)</h1>
+          <p class="lead">Mobile Legends: Bang Bang Account Name & Region Verification Tool</p>
+        </div>
+      </div>
+
+      <div class="form" style="margin-top:12px">
+        <input id="idInput" inputmode="numeric" placeholder="MLBB ID ထည့်ပါ (ဥပမာ 123456789)" autocomplete="off" />
+        <input id="serverInput" inputmode="numeric" placeholder="Server ID ထည့်ပါ (ဥပမာ 0000)" autocomplete="off" />
+
+      <div class="row buttons-row" style="margin-top: 4px;">
+        <button id="checkBtn" class="btn" style="flex:1;">စစ်ဆေးမည်</button>
+        <button id="copyBtn" class="secondary" style="min-width:120px;">📋 Copy</button>
+      </div>
+
+      <div id="loading-spinner-container">
+        <div id="loading-spinner"></div>
+        <div class="lottie-fallback" id="lottie-fallback"></div>
+      </div>
+
+        <div id="result" aria-atomic="true">Result ကိုဒီမှာပြသပေးမည်။</div>
+      </div>
+
+      <div class="meta">
+        <div class="history card small" style="background: var(--glass-bg); padding:16px; width:100%;">
+          <strong>🔁 History</strong>
+          <div id="historyContainer"></div>
+        </div>
+      </div>
+
+    </main>
+    
     <footer>• Created By MagicMall GameShop •</footer>
   </div>
 
-  <!-- Popup overlay -->
   <div id="popup" class="overlay" aria-hidden="true">
     <div class="popup">
-      <div style="font-size:22px;margin-bottom:6px">📢 Join Our Telegram Channel</div>
-      <p style="color:rgba(255,255,255,0.9);margin:8px 0 14px">Updateလေးတွေသိရအောင်အဆင်ပြေရင် Channelလေး joinခြင်းဖြင့်ကူညီနိုင်ပါတယ်ရှင့်။</p>
-      <div style="display:flex;gap:10px;justify-content:center">
-        <a id="popupJoin" href="https://t.me/Magic_Mall_Game_Shop" target="_blank"><button class="btn">Join Now</button></a>
+      <div style="font-size:24px;font-weight:700;margin-bottom:8px">📢 Join Our Telegram Channel</div>
+      <p style="color:var(--muted);margin:8px 0 20px; font-size:15px">Updateလေးတွေသိရအောင်အဆင်ပြေရင် Channelလေး joinခြင်းဖြင့်ကူညီနိုင်ပါတယ်ရှင့်။</p>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a id="popupJoin" href="https://t.me/Magic_Mall_Game_Shop" target="_blank" style="text-decoration:none;"><button class="btn">Join Now</button></a>
         <button id="popupClose" class="secondary">မစဉ်းစားပါ</button>
       </div>
     </div>
@@ -256,13 +349,13 @@
 
   <div id="toast" class="toast" role="status">Message</div>
 
-  <button id="contactBtn" title="Contact" style="background:linear-gradient(90deg,#0072ff,#00c6ff); color:#fff; border:none">Help</button>
+  <button id="contactBtn" title="Contact">Help</button>
 
   <script>
     // ---------- Config ----------
     const API_HOST = 'id-game-checker.p.rapidapi.com';
-const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
     const MAX_HISTORY = 6;
+    const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
 
     // Elements
     const idInput = document.getElementById('idInput');
@@ -277,7 +370,12 @@ const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
     const toast = document.getElementById('toast');
     const themeSwitch = document.getElementById('themeSwitch');
     const contactBtn = document.getElementById('contactBtn');
-
+    const loadingSpinnerContainer = document.getElementById('loading-spinner-container');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const lottieFallback = document.getElementById('lottie-fallback');
+    
+    let lottieAnim = null;
+    
     // ---------- Utilities ----------
     function showToast(text, ms = 2000){
       toast.textContent = text; toast.classList.add('show');
@@ -290,7 +388,6 @@ const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
       const key = 'mlbb_history_v1';
       const cur = JSON.parse(localStorage.getItem(key) || '[]');
       const entry = `${id} (${server})`;
-      // put to front
       const filtered = cur.filter(i=>i!==entry);
       filtered.unshift(entry);
       if(filtered.length>MAX_HISTORY) filtered.pop();
@@ -300,7 +397,7 @@ const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
 
     function renderHistory(){
       const cur = JSON.parse(localStorage.getItem('mlbb_history_v1') || '[]');
-      if(!cur.length){ historyContainer.innerHTML = '<div style="color:var(--muted);font-size:13px">No recent checks</div>'; return; }
+      if(!cur.length){ historyContainer.innerHTML = '<div style="color:var(--muted);font-size:13px; padding:8px 10px;">No recent checks</div>'; return; }
       const html = '<ul>' + cur.map(i=>`<li data-val="${i}">${i}</li>`).join('') + '</ul>';
       historyContainer.innerHTML = html;
       historyContainer.querySelectorAll('li').forEach(li => {
@@ -314,7 +411,7 @@ const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
     // Small typing animation for result
     function typeResult(text){
       resultBox.textContent = '';
-      let i=0; const speed = 8; // ms per char
+      let i=0; const speed = 8; 
       const id = setInterval(()=>{
         resultBox.textContent += text.charAt(i++);
         if(i>text.length) clearInterval(id);
@@ -376,72 +473,90 @@ function formatCountryInfo(code) {
   return `နိုင်ငံ: ${flag} ${name}`;
 }
 
+    // ---------- Loading State Management (Using Lottie with CSS Fallback) ----------
+    function showSpinner() {
+      loadingSpinnerContainer.style.display = 'flex';
+      
+      // Try to play Lottie, if not, show CSS fallback
+      if (lottieAnim) {
+          loadingSpinner.style.display = 'block';
+          lottieFallback.style.display = 'none';
+          lottieAnim.play();
+      } else {
+          loadingSpinner.style.display = 'none';
+          lottieFallback.style.display = 'block';
+      }
+    }
+
+    function hideSpinner() {
+      loadingSpinnerContainer.style.display = 'none';
+      if (lottieAnim) {
+          lottieAnim.stop();
+      }
+    }
+
     // ---------- Main action ----------
     async function checkML(){
-  const id = idInput.value.trim();
-  const server = serverInput.value.trim();
-  if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
+      const id = idInput.value.trim();
+      const server = serverInput.value.trim();
+      if(!id || !server){ showToast('ID နှင့် Server ID လိုအပ်သည်'); return; }
 
-  checkBtn.disabled = true;
-  checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
+      checkBtn.disabled = true;
+      checkBtn.textContent = 'စစ်ဆေးနေပါသည်...';
 
-  showSpinner();
+      showSpinner();
 
+      try {
+        const url = `https://${API_HOST}/mobile-legends/${encodeURIComponent(id)}/${encodeURIComponent(server)}`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-host': API_HOST,
+            'x-rapidapi-key': API_KEY
+          },
+          cache: 'no-store'
+        });
 
-  const API_HOST = 'id-game-checker.p.rapidapi.com';
-  const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
 
-  try {
-    const url = `https://${API_HOST}/mobile-legends/${encodeURIComponent(id)}/${encodeURIComponent(server)}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-host': API_HOST,
-        'x-rapidapi-key': API_KEY
-      },
-      cache: 'no-store'
-    });
+        if(json.error || !json.data){
+          typeResult('❌ အကောင့်မတွေ့ပါ။');
+          showToast('Account not found');
+        } else {
+          const d = json.data;
+          let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
+          msg += `✅ အမည်: ${d.username || '—'}\n`;
+          msg += `🆔 ID: ${d.id || id}\n`;
+          msg += `🖥 Server: ${d.server || server}\n`;
+          msg += formatCountryInfo(d.region) + '\n';
 
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-
-    if(json.error || !json.data){
-      typeResult('❌ အကောင့်မတွေ့ပါ။');
-      showToast('Account not found');
-    } else {
-      const d = json.data;
-      let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
-      msg += `✅ အမည်: ${d.username || '—'}\n`;
-      msg += `🆔 ID: ${d.id || id}\n`;
-      msg += `🖥 Server: ${d.server || server}\n`;
-      msg += formatCountryInfo(d.region) + '\n';
-
-      if(d.shop_events && d.shop_events.length){
-        msg += '\n💎 Shop Events:\n';
-        d.shop_events.forEach(ev => {
-          if(ev.title) msg += `\n— ${ev.title}\n`;
-          if(ev.goods && ev.goods.length){
-            ev.goods.forEach(g => {
-              let status = g.reached_limit === true ? '🔴 မရတော့ပါ' : '🟢 ရပါသေးတယ်';
-              msg += `${g.title || '—'} — ${status}\n`;
+          if(d.shop_events && d.shop_events.length){
+            msg += '\n💎 Shop Events:\n';
+            d.shop_events.forEach(ev => {
+              if(ev.title) msg += `\n— ${ev.title}\n`;
+              if(ev.goods && ev.goods.length){
+                ev.goods.forEach(g => {
+                  let status = g.reached_limit === true ? '🔴 မရတော့ပါ' : '🟢 ရပါသေးတယ်';
+                  msg += `${g.title || '—'} — ${status}\n`;
+                });
+              }
             });
           }
-        });
-      }
 
-      typeResult(msg);
-      saveHistory(id, server);
+          typeResult(msg);
+          saveHistory(id, server);
+        }
+      } catch(err){
+        console.error(err);
+        typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
+        showToast('Server error');
+      } finally {
+        hideSpinner();
+        checkBtn.disabled = false;
+        checkBtn.textContent = 'စစ်ဆေးမည်';
+      }
     }
-  } catch(err){
-    console.error(err);
-    typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
-    showToast('Server error');
-  } finally {
-    hideSpinner();
-    checkBtn.disabled = false;
-    checkBtn.textContent = 'စစ်ဆေးမည်';
-  }
-}
 
     // ---------- Copy result ----------
     copyBtn.addEventListener('click', ()=>{
@@ -477,6 +592,21 @@ function formatCountryInfo(code) {
 
     // Init
     (function init(){
+      // Lottie initialization
+      try {
+        lottieAnim = lottie.loadAnimation({
+          container: loadingSpinner,
+          renderer: 'svg',
+          loop: true,
+          autoplay: false,
+          path: 'https://raw.githubusercontent.com/HtunHlaAung/MagicMall-Mlbb-Server-Checker-Vip/456680c42c643d39c834e580c328ebb8a1211474/MWhite.json'
+        });
+        lottieAnim.setSpeed(2);
+      } catch(e) {
+        console.error("Lottie failed to load:", e);
+        lottieAnim = null; 
+      }
+      
       // autofocus
       idInput.focus();
       // restore history
@@ -494,33 +624,6 @@ function formatCountryInfo(code) {
 
     // small accessibility: allow keyboard toggle
     themeSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); themeSwitch.click(); } });
-
-  // ... your existing JS code ...
-
-  // Initialize Lottie animation for loading spinner
-  const loadingSpinner = document.getElementById('loading-spinner');
-
-  const lottieAnim = lottie.loadAnimation({
-  container: loadingSpinner, // the dom element
-  renderer: 'svg',
-  loop: true,
-  autoplay: false,
-  path: 'https://raw.githubusercontent.com/HtunHlaAung/MagicMall-Mlbb-Server-Checker-Vip/456680c42c643d39c834e580c328ebb8a1211474/MWhite.json'
-});
-    lottieAnim.setSpeed(2);  // 2x speed (twice as fast)
-  // Show spinner function
-  function showSpinner() {
-    loadingSpinner.style.display = 'block';
-    lottieAnim.play();
-  }
-
-  // Hide spinner function
-  function hideSpinner() {
-    lottieAnim.stop();
-    loadingSpinner.style.display = 'none';
-  }
-
-  // ... rest of your code ...
-</script>
+  </script>
 </body>
 </html>
