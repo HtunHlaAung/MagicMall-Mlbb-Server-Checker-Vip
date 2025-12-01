@@ -353,9 +353,9 @@
 
   <script>
     // ---------- Config ----------
-    const API_HOST = 'id-game-checker.p.rapidapi.com';
-    const MAX_HISTORY = 6;
-    const API_KEY = 'c27a00a598msh7af653724ce94e1p1fef03jsn5520451313ec';
+    // IMPORTANT: API_HOST and API_KEY are now removed from the client side 
+    // and are securely stored on the backend (serverless function).
+    const MAX_HISTORY = 6; 
 
     // Elements
     const idInput = document.getElementById('idInput');
@@ -495,7 +495,7 @@ function formatCountryInfo(code) {
       }
     }
 
-    // ---------- Main action ----------
+        // --- Main action ---
     async function checkML(){
       const id = idInput.value.trim();
       const server = serverInput.value.trim();
@@ -507,22 +507,24 @@ function formatCountryInfo(code) {
       showSpinner();
 
       try {
-        const url = `https://${API_HOST}/mobile-legends/${encodeURIComponent(id)}/${encodeURIComponent(server)}`;
-        const res = await fetch(url, {
+        // --- THIS IS THE NEW SECURE PROXY CALL ---
+        const proxyUrl = `/api/check-mlbb?id=${encodeURIComponent(id)}&server=${encodeURIComponent(server)}`;
+        
+        // No headers needed here, as the proxy key is on the server
+        const res = await fetch(proxyUrl, {
           method: 'GET',
-          headers: {
-            'x-rapidapi-host': API_HOST,
-            'x-rapidapi-key': API_KEY
-          },
           cache: 'no-store'
         });
+        // ------------------------------------------
 
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
         if(json.error || !json.data){
-          typeResult('❌ အကောင့်မတွေ့ပါ။');
-          showToast('Account not found');
+          // Check for specific error message from the backend proxy
+          const errorMsg = json.error === 'Account not found' ? '❌ အကောင့်မတွေ့ပါ။' : '🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ';
+          typeResult(errorMsg);
+          showToast('Account not found or proxy error');
         } else {
           const d = json.data;
           let msg = `✔️ အကောင့်တွေ့ပါပြီ\n\n`;
@@ -549,14 +551,15 @@ function formatCountryInfo(code) {
         }
       } catch(err){
         console.error(err);
-        typeResult('🚫 Server Error ပြန်လည်စမ်းကြည့်ပါ မရပါက 🇺🇸 US Vpn ဖြင့်စမ်းကြည့်ပါ။');
-        showToast('Server error');
+        typeResult('🚫 Connection Error ပြန်လည်စမ်းကြည့်ပါ');
+        showToast('Connection error');
       } finally {
         hideSpinner();
         checkBtn.disabled = false;
         checkBtn.textContent = 'စစ်ဆေးမည်';
       }
     }
+
 
     // ---------- Copy result ----------
     copyBtn.addEventListener('click', ()=>{
